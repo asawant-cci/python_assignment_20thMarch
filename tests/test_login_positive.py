@@ -11,72 +11,46 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
+from page_objects.dashboard_page import DashboardPage
+from page_objects.login_page import LoginPage
+
 service = ChromeService(executable_path=ChromeDriverManager().install())
 
 
 @pytest.mark.login
 @pytest.mark.login_positive
-def test_valid_user_login(driver):
+@pytest.mark.parametrize("username,password", [("admin", "admin123")])
+def test_valid_user_login(driver, username, password):
     """Test :A user with valid credentials should be able to Log in successfully
     URL :https://login-app-iota.vercel.app
     """
     # Act
-    # Navigate to Site URL
-    driver.get("https://login-app-iota.vercel.app")
+    # Navigate to Site URL and perform login
+    login_page = LoginPage(driver)
+    dashboard_page = DashboardPage(driver)
+    login_page.open()
+    login_page.perform_login(username, password)
 
     # Validate if the default URL is pointing to the login route
 
     time.sleep(10)
 
-    current_url = driver.current_url
-    assert current_url == "https://login-app-iota.vercel.app/login", "Default URL route should be login"
-
-    # locate username element
-    username_textbox = driver.find_element(By.ID, 'username_textbox')
-
-    # locate password element
-    password_textbox = driver.find_element(By.ID, 'password_textbox')
-
-    # locate login button
-    login_btn = driver.find_element(By.XPATH, "//button[@type='submit']")
-
-    # enter valid username
-    username_textbox.send_keys('admin')
-
-    # enter valid password
-    password_textbox.send_keys('admin123')
-
-    # Click on login button.
-    login_btn.click()
-    time.sleep(10)
-
-    # locate about link
-    about_link = driver.find_element(By.XPATH, "//*[@id='navbarSupportedContent']/div/a[5]")
-    about_link.click()
-    time.sleep(5)
-
     # Validate logged in URL
 
-    logged_url = driver.current_url
-    assert logged_url == "https://login-app-iota.vercel.app/about", "Default logged URL route should be about"
+    loaded_url = dashboard_page.current_url()
+    assert loaded_url == "https://login-app-iota.vercel.app/dashboard", "Default logged URL route should be dashboard"
 
     # Assert
     # Validate header title
-    header_text = driver.find_element(By.TAG_NAME, "h1")
-    login_text = header_text.text
-    assert header_text.is_displayed(), "Welcome message not displayed"
-    assert login_text == "Welcome to Selenium Learning Group", "Welcome text does not match"
+    dashboard_page.open_about_page()
+    time.sleep(5)
+    dashboard_page.header_text_is_displayed()
+
+
     time.sleep(4)
 
     # locate logout button
-    logout_btn = driver.find_element(By.LINK_TEXT, "Logout")
-
     # click on logout button
-    logout_btn.click()
-
     # validate that login page URL is displayed
-    assert driver.current_url == "https://login-app-iota.vercel.app/login"
-
+    dashboard_page.perform_logout()
     time.sleep(3)
-
-

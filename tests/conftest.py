@@ -14,10 +14,11 @@ from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 
 # Arrange
-@pytest.fixture(params=["Chrome", "Firefox", "Edge"])            # remove (params=["Chrome", "firefox", "edge"]) to run only on a specific browser
+@pytest.fixture
+# @pytest.fixture(params=["Chrome", "Firefox", "Edge"])            # remove (params=["Chrome", "firefox", "edge"]) to run only on a specific browser
 def driver(request):
-    # browser = request.config.getoption("--browser")            ------------ uncomment this to run only on a specific browser
-    browser = request.param
+    browser = request.config.getoption("--browser")            # ------------ uncomment this to run only on a specific browser
+    # browser = request.param
     # Open the browser
     print(f'Creating driver for {browser} browser')
     if browser == "Chrome":
